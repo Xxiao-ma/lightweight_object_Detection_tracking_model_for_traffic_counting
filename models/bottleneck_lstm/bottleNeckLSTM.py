@@ -4,7 +4,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 import tensorflow as tf
-from keras.layers.convolutional_recurrent import ConvLSTM2D
 from keras.layers import SeparableConv2D
 from keras import backend as K
 import keras.layers as KL
@@ -177,6 +176,9 @@ class BottleneckLSTM2DCell(Layer):
         
         input_dim = input_shape[-1]
         # kernel size of input bottleneck
+        kernel_shape = self.kernel_size + (input_dim, self.filters * 4)
+        self.kernel_shape = kernel_shape
+
         input_kernel_dw_shape = (3,3) + (input_dim +self.filters, 1)#self.kernel_size + (input_dim +self.filters, self.filters)
         input_kernel_pw_shape = (1,1) + (input_dim +self.filters, self.filters)
         recurrent_dw_kernel_shape = (3,3)+ (self.filters, 1)#self.kernel_size + (self.filters, self.filters * 4)
@@ -352,6 +354,16 @@ class BottleneckLSTM2DCell(Layer):
     def seprable_conv(self, x, d_k, p_k, b=None, padding='same'):
         conv_out = K.separable_conv2d(x, d_k, p_k,
                             strides=self.strides,
+                            padding=padding,
+                            data_format=self.data_format,
+                            dilation_rate=self.dilation_rate)
+        if b is not None:
+            conv_out = K.bias_add(conv_out, b,
+                                  data_format=self.data_format)
+        return conv_out
+
+    def input_conv(self, x, w, b=None, padding='valid'):
+        conv_out = K.conv2d(x, w, strides=self.strides,
                             padding=padding,
                             data_format=self.data_format,
                             dilation_rate=self.dilation_rate)

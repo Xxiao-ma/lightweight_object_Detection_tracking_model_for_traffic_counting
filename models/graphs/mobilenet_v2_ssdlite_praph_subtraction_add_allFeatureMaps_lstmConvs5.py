@@ -219,16 +219,12 @@ def mobilenet_v2_ssdlite(input_image, sub):
                                  expansion=6, stage=4, block_id=7)
     
     # stage5
-    x = _inverted_res_block(x, filters=160, alpha=alpha, stride=2,
-                            expansion=6, stage=5, block_id=1)
-
+    x, link1 = _inverted_res_block(x, filters=160, alpha=alpha, stride=2,
+                        expansion=6, stage=5, block_id=1, output2=True)
     # add conv lstm at stage 5, before exporting the first feature map
     #x = ConvLSTM2D(filters=160, kernel_size=(3,3), padding='same',stateful='True',return_sequences='False')(x)
     # next step try the backbone without link1 
-    link1 = x
     # concatenate sub here                        
-    sub = dw_sub_block(sub, filters=160, alpha=alpha, stride=2, stage=5, block_id=1)
-    x = KL.Add(name='10_10_160stage5_add')([x, sub])
 
     x = _inverted_res_block(x, filters=160, alpha=alpha, stride=1,
                             expansion=6, stage=5, block_id=2)

@@ -169,7 +169,7 @@ class SSDLoss:
         # ut at least `self.n_neg_min` (unless `n_neg_loses` is smaller).
         n_negative_keep = tf.minimum(tf.maximum(self.neg_pos_ratio * tf.to_int32(n_positive), self.n_neg_min),
                                      n_neg_losses)
-
+        print('n_negative_keep',n_negative_keep)
         # In the unlikely case when either (1) there are no negative ground truth boxes at all
         # or (2) the classification loss for all negative boxes is zero, return zero as the `neg_class_loss`.
         def f1():
@@ -202,7 +202,9 @@ class SSDLoss:
             return neg_class_loss
 
         neg_class_loss = tf.cond(tf.equal(n_neg_losses, tf.constant(0)), f1, f2)
-
+        scaleForNegLoss = tf.constant(0.3)
+        neg_class_loss = tf.multiply(neg_class_loss, scaleForNegLoss)
+        print(neg_class_loss)
         class_loss = pos_class_loss + neg_class_loss  # Tensor of shape (batch_size,)
 
         # 3: Compute the localization loss for the positive targets.

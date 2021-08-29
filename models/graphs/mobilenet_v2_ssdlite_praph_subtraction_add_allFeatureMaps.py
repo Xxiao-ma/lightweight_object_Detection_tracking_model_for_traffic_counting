@@ -182,7 +182,7 @@ def mobilenet_v2_ssdlite(input_image, sub):
 
     # concatenate sub here  
     sub = dw_sub_block(sub, filters=32, alpha=alpha, stride=2, stage=3, block_id=1)
-    x = KL.Add(name='38_38_32stage3_add')([x[0], sub[0]])#KL.Add(name=name + '_add')([inputs, x])
+    x = KL.Add(name='38_38_32stage3_add')([x, sub])#KL.Add(name=name + '_add')([inputs, x])
                         
     x = _inverted_res_block(x, filters=32, alpha=alpha, stride=1,
                             expansion=6, stage=3, block_id=2)
@@ -214,8 +214,8 @@ def mobilenet_v2_ssdlite(input_image, sub):
     x, link1 = _inverted_res_block(x, filters=160, alpha=alpha, stride=2,
                             expansion=6, stage=5, block_id=1, output2=True)
     # concatenate sub here                        
-    sub = dw_sub_block(sub, filters=160, alpha=alpha, stride=2, stage=5, block_id=1)
-    x = KL.Add(name='10_10_160stage5_add')([x, sub])
+    # sub = dw_sub_block(sub, filters=160, alpha=alpha, stride=2, stage=5, block_id=1)
+    # x = KL.Add(name='10_10_160stage5_add')([x, sub])
 
     x = _inverted_res_block(x, filters=160, alpha=alpha, stride=1,
                             expansion=6, stage=5, block_id=2)

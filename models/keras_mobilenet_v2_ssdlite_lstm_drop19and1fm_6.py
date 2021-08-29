@@ -8,7 +8,8 @@ import keras.backend as K
 from layers.AnchorBoxesLayer import AnchorBoxes
 from layers.DecodeDetectionsLayer import DecodeDetections
 from layers.DecodeDetectionsFastLayer import DecodeDetectionsFast
-from models.graphs.baseline_and_bottlenecklstm import mobilenet_v2_ssdlite
+from models.graphs.baseline_and_bottlenecklstm import mobilenet_v2_ssdlite #this is the backbone with bottelneck Lstm
+#from models.graphs.baseline_and_bottlenecklstm_change2ConvLSTM_for_test import mobilenet_v2_ssdlite # this is used to test with conv2dLSTM Unit
 
 
 def predict_block(inputs, out_channel, sym, id):
@@ -51,7 +52,9 @@ def mobilenet_v2_ssd(image_size,
             iou_threshold=0.45,
             top_k=200,
             nms_max_output_size=400,
-            return_predictor_sizes=False):
+            return_predictor_sizes=False,
+            batch_size=10,
+            sequence_size=1):
   
 
     n_predictor_layers = 4  # The number of predictor conv layers in the network is 6 for the original SSD300.
@@ -146,8 +149,8 @@ def mobilenet_v2_ssd(image_size,
     ############################################################################
     # Build the network.
     ############################################################################
-
-    x = Input(batch_shape=(1,)+(1,)+(img_height, img_width, img_channels),name = 'img_input')
+    # format of the input: (batch size) + (timesteps) +(img shape)
+    x = Input(batch_shape=(batch_size,)+(sequence_size,)+(img_height, img_width, img_channels),name = 'img_input')
     # The following identity layer is only needed so that the subsequent lambda layers can be optional.
     #x1 = Lambda(identity_layer, output_shape=(1, img_height, img_width, img_channels), name='identity_layer')(x)
     #x2 = Lambda(identity_layer, output_shape=(1, img_height, img_width, img_channels), name='identity_layer2')(x_sub)

@@ -2,6 +2,8 @@ import keras.layers as KL
 import keras.backend as K
 from keras.layers import TimeDistributed, Lambda
 from models.bottleneck_lstm.bottleNeckLSTM import BottleneckLSTM2D
+from keras.layers.convolutional_recurrent import ConvLSTM2D
+
 def _make_divisible(v, divisor, min_value=None):
     if min_value is None:
         min_value = divisor
@@ -257,7 +259,8 @@ def mobilenet_v2_ssdlite(input_image):
     x = _inverted_res_block(x, filters=320, alpha=alpha, stride=1,
                                  expansion=6, stage=5, block_id=4)
     # place lstm after stage 5
-    x = BottleneckLSTM2D(filters=80, kernel_size=3, padding='same',stateful='True',return_sequences='False')(x)
+    #x = BottleneckLSTM2D(filters=320, kernel_size=3, padding='same',stateful=True, return_sequences=True)(x)
+    x = ConvLSTM2D(filters=160, kernel_size=(3,3), padding='same',stateful=True, return_sequences=False)(x)
     
     x = TimeDistributed(KL.Conv2D(1280, kernel_size=1, padding='same', use_bias=False, activation=None, name='ssd_2_conv'))(x)
     x = TimeDistributed(KL.BatchNormalization(epsilon=1e-3, momentum=0.999, name='ssd_2_conv_bn'))(x)
